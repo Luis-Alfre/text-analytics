@@ -1,11 +1,19 @@
 # model
 # flask
-from flask import Response, request
+from flask import request
 from flask_restful import Resource
 from wordcloud import WordCloud, STOPWORDS
 import matplotlib.pyplot as plt
 from collections import OrderedDict
-from PDFminer.high_level import extract_text
+
+from pdfminer.converter import TextConverter
+from pdfminer.layout import LAParams
+from pdfminer.pdfdocument import PDFDocument
+from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
+from pdfminer.pdfpage import PDFPage
+from pdfminer.pdfparser import PDFParser
+
+from io import StringIO
 
 
 def wordcloud (body):
@@ -13,7 +21,7 @@ def wordcloud (body):
     wordcloud = WordCloud(width = 800, height = 800,
                 background_color ='white',
                 stopwords = stopwords,
-                min_font_size = 10).generate(body['texto'].lower())
+                min_font_size = 10).generate(body)
  
         # plot the WordCloud image                      
     plt.figure(figsize = (8, 8), facecolor = None)
@@ -48,10 +56,9 @@ class AnalyticsApi(Resource):
         
         graphBarr(words,freqs)    
         
-        wordcloud(body)
+        wordcloud(body['texto'].lower())
         
 
-    
 
         return {"message": "Las graficas se han realizado",
                     "status": 200}, 200
@@ -60,19 +67,35 @@ class AnalyticsApiPdf(Resource):
     
     def post(self):
         body = request.files['file']
-        PDF_read = extract_text(body)
-        print(PDF_read) 
         
-        # cloud = WordCloud().generate(body['texto'].lower())
-        # print(cloud.words_)
-        # words = []
-        # freqs = []
+        output_string = StringIO()
+        parser = PDFParser(body)
+        doc = PDFDocument(parser)
+        rsrcmgr = PDFResourceManager()
+        device = TextConverter(rsrcmgr, output_string, laparams=LAParams())
+        interpreter = PDFPageInterpreter(rsrcmgr, device)
+        for page in PDFPage.create_pages(doc):
+            interpreter.process_page(page)
+            
+        reader_contents = (output_string.getvalue().lower()).split() 
 
-        # for word in cloud.words_:
-        #     words.append(word)
-        #     freqs.append(int(cloud.words_[word]*4716))
-
-        # print(words)
+        #print(reader_contents)
+        
+        freqs = []
+     
+        #words = list(cloud.words_.keys())
+        words = list(OrderedDict.fromkeys(reader_contents))
+                
+        for word in words:
+            freqs.append(reader_contents.count(word))
+            
+        
+        print(words)
+        print(freqs)
+        
+        graphBarr(words,freqs)    
+        
+        wordcloud(output_string.getvalue().lower())
 
         return {"message": "El usuario no tiene permisos para realizar esta operación.",
                     "status": 403}, 403

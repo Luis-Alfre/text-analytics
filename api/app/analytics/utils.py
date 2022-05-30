@@ -8,7 +8,7 @@ from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
 from pdfminer.pdfpage import PDFPage
 from pdfminer.pdfparser import PDFParser
 from io import StringIO
-
+import numpy as np
 
 
 
@@ -20,8 +20,8 @@ def wordcloud (body):
                 background_color ='white',
                 stopwords = stopwords,
                 min_font_size = 10).generate(body)
- 
-        # plot the WordCloud image                      
+    print(list(wordcloud.words_.keys()))
+    # plot the WordCloud image                      
     plt.figure(figsize = (8, 8), facecolor = None)
     plt.imshow(wordcloud)
     plt.axis("off")
@@ -31,6 +31,8 @@ def wordcloud (body):
 def graphBarr(x,y):
     plt.bar(x, y)
     plt.savefig("Plot generated using Matplotlib.png")
+    
+    
     
 def readPDF(body):
     output_string = StringIO()

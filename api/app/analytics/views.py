@@ -2,6 +2,7 @@ from flask import request
 from flask_restful import Resource
 from collections import OrderedDict
 from api.app.analytics.utils import graphBarr, wordcloud, readPDF
+from wordcloud import WordCloud
 
 import pandas
 import numpy as np
@@ -28,16 +29,17 @@ class AnalyticsApi(Resource):
                 words.remove(i)
             except ValueError:
                 pass
+        
+        cloud = WordCloud().generate(" ".join(words))
+        words = list(cloud.words_.keys())
                         
         for word in words:
             freqs.append(reader_contents.count(word))   
-            
-        indices = list(reversed(np.argsort(freqs)))[:limit]
-        words = ([words[i] for i in indices])
-        freqs = ([freqs[i] for i in indices])
-        
-        graphBarr(words,freqs)    
-        wordcloud(" ".join(words))
+        words = words[:limit]
+        freqs = freqs[:limit]
+        # indices = list(reversed(np.argsort(freqs)))[:limit]
+        # words = ([words[i] for i in indices])
+        # freqs = ([freqs[i] for i in indices])
         
         return {"words": words,
                 "freqs": freqs,
@@ -60,17 +62,15 @@ class AnalyticsApiPdf(Resource):
                 words.remove(i)
             except ValueError:
                 pass
+          
+        cloud = WordCloud().generate(" ".join(words))
+        words = list(cloud.words_.keys())
                 
         for word in words:
             freqs.append(reader_contents.count(word))
+        words = words[:limit]
+        freqs = freqs[:limit]
             
-        indices = list(reversed(np.argsort(freqs)))[:limit]
-        words = ([words[i] for i in indices])
-        freqs = ([freqs[i] for i in indices])
-            
-        graphBarr(words,freqs)    
-        wordcloud(" ".join(words))
-
         return {"words": words,
                 "freqs": freqs,
                     "status": 200}, 200

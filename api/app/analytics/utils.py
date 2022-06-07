@@ -10,10 +10,6 @@ from pdfminer.pdfparser import PDFParser
 from io import StringIO
 import numpy as np
 
-
-
-url = "/home/luis/Documentos/Wtredata/text-analytics/listText.txt"
-
 def wordcloud (body):
     stopwords = set(STOPWORDS)
     wordcloud = WordCloud(width = 800, height = 800,
@@ -30,7 +26,7 @@ def wordcloud (body):
     
 def graphBarr(x,y):
     plt.bar(x, y)
-    plt.savefig("Plot generated using Matplotlib.png")
+    plt.savefig("graphBarr.png")
     
     
     

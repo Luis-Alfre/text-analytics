@@ -40,7 +40,8 @@ class AnalyticsApi(Resource):
         # indices = list(reversed(np.argsort(freqs)))[:limit]
         # words = ([words[i] for i in indices])
         # freqs = ([freqs[i] for i in indices])
-        
+        # graphBarr(words,freqs)
+        # wordcloud(reader_contents)
         return {"words": words,
                 "freqs": freqs,
                     "status": 200}, 200
